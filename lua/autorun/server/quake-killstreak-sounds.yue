@@ -111,8 +111,8 @@ do
 
 do
 
-    resetCounter = =>
-        attacker[ addonName .. " - Frags" ] = 0
+    resetCounter = ( ply ) ->
+        ply[ addonName .. " - Frags" ] = 0
 
     hook.Add "PlayerSpawn", addonName, resetCounter
     hook.Add "PostPlayerDeath", addonName, resetCounter
