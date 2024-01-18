@@ -87,11 +87,11 @@ do
     HITGROUP_HEAD = HITGROUP_HEAD
     CurTime = CurTime
 
-    hook.Add "PlayerDeath", addonName, ( victim, _, attacker ) ->
-        unless attacker\IsValid! and attacker ~= victim and attacker\IsPlayer! and attacker\Alive!
+    hook.Add "DoPlayerDeath", addonName, ( attacker, damageInfo ) =>
+        unless attacker\IsValid! and attacker ~= @ and attacker\IsPlayer! and attacker\Alive!
             return
 
-        if victim\LastHitGroup! == HITGROUP_HEAD
+        if @LastHitGroup! == HITGROUP_HEAD and damageInfo\IsBulletDamage!
             attacker[ addonName .. " - Frags" ] = attacker[ addonName .. " - Frags" ] + 1
             emitQuakeSound( attacker, "headshot" )
             return
