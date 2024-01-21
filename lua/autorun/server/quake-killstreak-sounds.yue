@@ -63,7 +63,7 @@ do
 
         emitQuakeSound = ( placeholder ) =>
             timerName = addonName .. " - " .. tostring( @ )
-            Create timerName, 0.025, 1, ->
+            Create timerName, 0.25, 1, ->
                 if not @IsValid! or ( @IsPlayer! and not @Alive! )
                     return
 
