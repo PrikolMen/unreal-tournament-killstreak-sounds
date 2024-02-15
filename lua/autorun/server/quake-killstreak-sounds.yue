@@ -98,16 +98,19 @@ do
 
         lastKill, curTime = attacker[ addonName ], CurTime!
         attacker[ addonName ] = curTime
+
         unless lastKill
             return
 
         frags = attacker[ addonName .. " - Frags" ]
         if ( curTime - lastKill ) > qs_time_to_kill\GetFloat!
             frags = 0
+
         frags += 1
 
         attacker[ addonName .. " - Frags" ] = frags
         emitQuakeSound( attacker, frags )
+        return
 
 do
 
