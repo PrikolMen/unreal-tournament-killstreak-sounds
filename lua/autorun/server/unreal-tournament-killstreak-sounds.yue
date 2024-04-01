@@ -1,6 +1,6 @@
-addonName = "Advanced Quake Sounds"
+addonName = "Unreal Tournament Killstreak Sounds"
 sounds = list.GetForEdit( addonName )
-resource.AddWorkshop( "3141611150" )
+resource.AddWorkshop( "3209446591" )
 
 do
 
@@ -79,11 +79,11 @@ do
                         soundName = soundName[ random( 1, length ) ]
 
                 if isstring( soundName )
-                    @EmitSound( "quake-sounds/" .. soundName, random( 50, 100 ), random( 90, 110 ), 1, 0, 1 )
+                    @EmitSound( "killstreak-sounds/" .. soundName, random( 50, 100 ), random( 90, 110 ), 1, 0, 1 )
 
         global EmitQuakeSound = emitQuakeSound
 
-    qs_time_to_kill = CreateConVar( "qs_time_to_kill", "5", FCVAR_ARCHIVE, "Time to successfully complete a series of kills, once the specified time has elapsed the series will be invalid.", 0, 300 )
+    ut_time_to_kill = CreateConVar( "utks_time_to_kill", "5", bit.bor( FCVAR_ARCHIVE, FCVAR_NOTIFY ), "Time to successfully complete a series of kills, once the specified time has elapsed the series will be invalid.", 0, 300 )
     HITGROUP_HEAD = HITGROUP_HEAD
     CurTime = CurTime
 
@@ -103,7 +103,7 @@ do
             return
 
         frags = attacker[ addonName .. " - Frags" ]
-        if ( curTime - lastKill ) > qs_time_to_kill\GetFloat!
+        if ( curTime - lastKill ) > ut_time_to_kill\GetFloat!
             frags = 0
 
         frags += 1
