@@ -48,8 +48,7 @@ do
 
 do
 
-
-    emitQuakeSound = nil
+    emitKillstreakSound = nil
     do
 
         :Create, :Remove = timer
@@ -58,13 +57,13 @@ do
         istable = istable
         :random = math
 
-        hook.Add "PlayerDisconnected", addonName, =>
-            Remove addonName .. " - " .. tostring( @ )
+        hook.Add "PlayerDisconnected", addonName, ( ply ) ->
+            Remove addonName .. " - " .. tostring( ply )
 
-        emitQuakeSound = ( placeholder ) =>
-            timerName = addonName .. " - " .. tostring( @ )
+        emitKillstreakSound = ( ply, placeholder ) ->
+            timerName = addonName .. " - " .. tostring( ply )
             Create timerName, 0.25, 1, ->
-                if not @IsValid! or ( @IsPlayer! and not @Alive! )
+                if not ply\IsValid! or ( ply\IsPlayer! and not ply\Alive! )
                     return
 
                 soundName = sounds[ placeholder ]
@@ -79,21 +78,22 @@ do
                         soundName = soundName[ random( 1, length ) ]
 
                 if isstring( soundName )
-                    @EmitSound( "killstreak-sounds/" .. soundName, random( 50, 100 ), random( 90, 110 ), 1, 0, 1 )
+                    ply\EmitSound( "killstreak-sounds/" .. soundName, random( 50, 100 ), random( 90, 110 ), 1, 0, 1 )
 
-        global EmitQuakeSound = emitQuakeSound
+        global EmitKillstreakSound = emitKillstreakSound
 
-    ut_time_to_kill = CreateConVar( "utks_time_to_kill", "5", bit.bor( FCVAR_ARCHIVE, FCVAR_NOTIFY ), "Time to successfully complete a series of kills, once the specified time has elapsed the series will be invalid.", 0, 300 )
+    flags = bit.bor( FCVAR_ARCHIVE, FCVAR_NOTIFY )
+    utks_time_to_kill = CreateConVar( "utks_time_to_kill", "5", flags, "Time to successfully complete a series of kills, once the specified time has elapsed the series will be invalid.", 0, 300 )
     HITGROUP_HEAD = HITGROUP_HEAD
     CurTime = CurTime
 
-    hook.Add "DoPlayerDeath", addonName, ( attacker, damageInfo ) =>
-        unless attacker\IsValid! and attacker ~= @ and attacker\IsPlayer! and attacker\Alive!
+    hook.Add "DoPlayerDeath", addonName, ( ply, attacker, damageInfo ) ->
+        unless attacker\IsValid! and attacker ~= ply and attacker\IsPlayer! and attacker\Alive!
             return
 
-        if @LastHitGroup! == HITGROUP_HEAD and damageInfo\IsBulletDamage!
+        if ply\LastHitGroup! == HITGROUP_HEAD and damageInfo\IsBulletDamage!
             attacker[ addonName .. " - Frags" ] = attacker[ addonName .. " - Frags" ] + 1
-            emitQuakeSound( attacker, "headshot" )
+            emitKillstreakSound( attacker, "headshot" )
             return
 
         lastKill, curTime = attacker[ addonName ], CurTime!
@@ -103,13 +103,38 @@ do
             return
 
         frags = attacker[ addonName .. " - Frags" ]
-        if ( curTime - lastKill ) > ut_time_to_kill\GetFloat!
+        if ( curTime - lastKill ) > utks_time_to_kill\GetFloat!
             frags = 0
 
         frags += 1
 
         attacker[ addonName .. " - Frags" ] = frags
-        emitQuakeSound( attacker, frags )
+        emitKillstreakSound( attacker, frags )
+        return
+
+    utks_npc_kills = CreateConVar( "utks_npc_kills", "0", flags, "Enable kill streak for NPCs.", 0, 1 )\GetBool!
+    cvars.AddChangeCallback( "utks_npc_kills", ( _, __, value ) ->
+        utks_npc_kills = value == "1"
+    addonName )
+
+    hook.Add "OnNPCKilled", addonName, ( _, attacker ) ->
+        unless utks_npc_kills and attacker and attacker\IsValid! and attacker\IsPlayer! and attacker\Alive!
+            return
+
+        lastKill, curTime = attacker[ addonName ], CurTime!
+        attacker[ addonName ] = curTime
+
+        unless lastKill
+            return
+
+        frags = attacker[ addonName .. " - Frags" ]
+        if ( curTime - lastKill ) > utks_time_to_kill\GetFloat!
+            frags = 0
+
+        frags += 1
+
+        attacker[ addonName .. " - Frags" ] = frags
+        emitKillstreakSound( attacker, frags )
         return
 
 do
